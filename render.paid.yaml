@@ -1,0 +1,66 @@
+# PAID VARIANT (Starter + 1 GB persistent disk). To use it, copy this file over render.yaml. Needs a paid Render plan and a card.
+# Persistent disk keeps the SQLite database and uploads across restarts and deploys.
+#
+# Secrets (sync: false) are entered in the Render dashboard, never in this file. The values below mirror .env.example.
+services:
+  - type: web
+    name: fieldgrant
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    # Render marks the service unhealthy (and restarts it) when this returns non-200: it does a timed SQLite write and a write to the
+    # uploads folder, so a missing or read-only disk is caught, not just a crashed process.
+    healthCheckPath: /api/health
+    # PERSISTENT DISK ARCHITECTURE. Render instances have an ephemeral filesystem: anything written outside a mounted disk is lost on
+    # every deploy or restart. This disk is mounted at /var/data and holds BOTH stateful things the app writes:
+    #   /var/data/fieldgrant.sqlite   the SQLite database (grants, tranches, submissions, ledger, vault, reports)
+    #   /var/data/uploads/            receipts, proof of work and reports (never inside the web root)
+    # The app reads DATABASE_PATH and UPLOADS_DIR (below), so no code change is needed. A disk attaches to a single instance,
+    # which is why this stays one instance: SQLite is a single-writer file database.
+    disk:
+      name: fieldgrant-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Persistent storage: both live on the mounted disk.
+      - key: DATABASE_PATH
+        value: /var/data/fieldgrant.sqlite
+      - key: UPLOADS_DIR
+        value: /var/data/uploads
+      - key: MAX_UPLOAD_BYTES
+        value: "8388608"
+      - key: DEMO_RESET_ENABLED
+        value: "true"
+      # AI provider: Gemini by default; Anthropic is an optional alternative.
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-5-5
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # PayPal SANDBOX only. The app refuses other hosts.
+      - key: PAYPAL_BASE_URL
+        value: https://api-m.sandbox.paypal.com
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_WEBHOOK_ID
+        sync: false
+      # Sandbox recipient (Personal) account emails, one per seeded organization.
+      - key: NGO1_PAYPAL_EMAIL
+        sync: false
+      - key: NGO2_PAYPAL_EMAIL
+        sync: false
+      - key: NGO3_PAYPAL_EMAIL
+        sync: false
+      # Optional: shows the GitHub and Docs links on the landing page.
+      - key: NEXT_PUBLIC_GITHUB_URL
+        sync: false

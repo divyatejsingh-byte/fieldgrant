@@ -212,6 +212,8 @@ only confirmed by `npm run test:payout` and manual sandbox runs.
 
 ## Deploy to Render
 
+`render.yaml` is the **free** blueprint (no persistent disk: data lives in `/tmp` and resets after restarts or 15 idle minutes; the demo reseeds itself). `render.paid.yaml` is the Starter + persistent-disk variant; copy it over `render.yaml` to use it.
+
 `render.yaml` is a blueprint. SQLite needs a **persistent disk** (paid instance type). On the free tier, drop the
 `disk` block: the DB lives on ephemeral storage and reseeds automatically on boot. Set secrets in the dashboard.
 Register `https://<your-app>.onrender.com/api/webhooks/paypal` as the sandbox webhook URL.
