@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    @apply bg-[#F9FAFB] font-sans text-[14px] leading-5 text-zinc-900 antialiased tracking-normal;
+  }
+  /* Keyboard focus is always visible; mouse focus stays quiet. */
+  :focus-visible { @apply outline-2 outline-offset-2 outline-slate-900; }
+  ::selection { @apply bg-slate-900 text-white; }
+  h1, h2, h3 { @apply tracking-tight; }
+}
+
+@layer components {
+  /* Plain caption for every field and section. */
+  .label { @apply text-[12px] font-medium text-zinc-600; }
+  /* Financial amounts, ids, dates, hashes. */
+  .num { @apply font-mono tabular-nums; }
+  /* Micro-label for metadata: tiny, mono, uppercase. */
+  .micro { @apply font-mono text-[10px] uppercase tracking-wider text-zinc-500; }
+  .btn-primary, .btn-secondary, .btn-danger, .btn-clear {
+    @apply inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-3 text-[13px] font-medium transition-colors
+      disabled:cursor-not-allowed disabled:opacity-45;
+  }
+  .btn-primary { @apply border-slate-900 bg-slate-900 text-white hover:bg-slate-800; }
+  .btn-secondary { @apply border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50; }
+  .btn-danger { @apply border-rose-700 bg-rose-700 text-white hover:bg-rose-800; }
+  .btn-clear { @apply border-emerald-700 bg-emerald-700 text-white hover:bg-emerald-800; }
+  .field {
+    @apply h-8 w-full rounded-md border border-zinc-300 bg-white px-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400
+      focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900;
+  }
+}
+
+/* AG Grid row cues: rows that open a decision are clickable; exceptions are tinted. */
+.fg-row-link { cursor: pointer; }
+.fg-row-hold { background-color: #fff1f2; }
+.fg-row-review { background-color: #fffbeb; }
+
+/* Soft fade when a tab's content swaps in. */
+@keyframes fg-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.fg-fade { animation: fg-fade-in 0.2s ease-out; }
+@media (prefers-reduced-motion: reduce) { .fg-fade { animation: none; } }
+
+/* AG Grid column headers: mono, 11px, uppercase, tracked out, to match the micro-label style everywhere. */
+.ag-header-cell-text { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: #71717a; font-weight: 600; }
+.ag-header { border-bottom: 1px solid #e4e4e7; }

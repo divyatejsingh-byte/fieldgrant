@@ -1,0 +1,26 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# runtime data (uploaded evidence + sqlite db)
+uploads/
+data/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.db
+
+# deps / build
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# misc
+.DS_Store
+npm-debug.log*
+.vercel
+.claude/
