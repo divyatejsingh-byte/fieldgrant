@@ -122,7 +122,7 @@ export async function createPayout(i: CreatePayoutInput): Promise<PayoutBatchRes
 
 /** True when sandbox credentials are present. Lets the app run (and fail gracefully) before PayPal is set up. */
 export function paypalConfigured(): boolean {
-  return !!(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET);
+  return !!(process.env.PAYPAL_CLIENT_ID?.trim() && process.env.PAYPAL_CLIENT_SECRET?.trim());
 }
 
 /**

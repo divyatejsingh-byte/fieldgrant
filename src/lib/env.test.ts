@@ -37,3 +37,12 @@ describe("persistent storage on a mounted disk", () => {
     delete process.env.DATABASE_PATH; delete process.env.UPLOADS_DIR;
   });
 });
+
+describe("requireEnv", () => {
+  it("trims whitespace pasted around a key", async () => {
+    const { requireEnv } = await import("./env");
+    process.env.FG_TEST_KEY = "  abc123 \t";
+    expect(requireEnv("FG_TEST_KEY")).toBe("abc123");
+    delete process.env.FG_TEST_KEY;
+  });
+});

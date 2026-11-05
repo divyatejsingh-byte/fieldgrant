@@ -12,7 +12,8 @@ export function loadEnv(): void {
 }
 
 export function requireEnv(name: string): string {
-  const v = process.env[name];
+  // Trimmed: a space or newline picked up when pasting a key into a dashboard must not break authentication.
+  const v = process.env[name]?.trim();
   if (!v) throw new Error(`Missing required environment variable ${name} (see .env.example)`);
   return v;
 }
