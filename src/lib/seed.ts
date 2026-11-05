@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 // Seed data. Re-running WIPES all app rows and reseeds, so it doubles as "reset demo data".
 // Many-to-many by design: CleanWater holds grants from two funders; Wellspring funds two NGOs.
 import type Database from "better-sqlite3";
@@ -108,6 +109,8 @@ const GRANTS: GrantSeed[] = [
 export function seedDatabase(db: Database.Database, emails: [string, string, string]): { tranches: string[] } {
   const lines: string[] = [];
   db.transaction(() => {
+    // New epoch for PayPal batch ids: a reseeded demo must never reuse a sender_batch_id PayPal has already seen (see idempotency.ts).
+    db.prepare("INSERT OR REPLACE INTO app_meta (key, value) VALUES ('payout_epoch', ?)").run(randomBytes(4).toString("hex"));
     for (const t of ["report", "ledger_entry", "submission", "tranche", "grant_award", "ngo", "foundation"]) db.exec(`DELETE FROM ${t}`);
     db.exec("DELETE FROM sqlite_sequence WHERE name IN ('report','ledger_entry','submission','tranche','grant_award','ngo','foundation')");
 

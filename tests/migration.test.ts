@@ -19,7 +19,7 @@ describe("migration 003 (foundations) upgrades an existing database", () => {
     ins.run("G2", "Old Funder B");
     ins.run("G3", "Old Funder A");
 
-    expect(migrate(db)).toEqual(["003_foundations.sql", "004_compliance.sql", "005_reports.sql"]);
+    expect(migrate(db)).toEqual(["003_foundations.sql", "004_compliance.sql", "005_reports.sql", "006_app_meta.sql"]);
 
     const f = db.prepare("SELECT id, name, fy_model FROM foundation ORDER BY id").all() as { id: number; name: string; fy_model: string }[];
     expect(f.map((x) => x.name).sort()).toEqual(["Old Funder A", "Old Funder B"]);

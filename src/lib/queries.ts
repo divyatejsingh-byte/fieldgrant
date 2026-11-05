@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
 import { buildConsensus } from "./consensus";
-import { paypalRequestId } from "./idempotency";
+import { requestIdForBatch } from "./idempotency";
 import { isFYModel } from "./fiscal-year";
 
 type Row = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -133,7 +133,7 @@ export function payoutInspector(db: Database.Database, batchId: string) {
     destinationEmail: ngo.paypal_email as string, ngoName: ngo.name as string,
     amountCents: tranche.amount_cents as number, grantName: grant.name as string, trancheSeq: tranche.seq as number,
     senderBatchId: (payload.sender_batch_id as string | undefined) ?? batchId, attempt,
-    requestId: paypalRequestId(grant.id as number, tranche.seq as number, attempt),
+    requestId: requestIdForBatch((payload.sender_batch_id as string | undefined) ?? batchId),
     dispatchedAt: created.created_at as string,
     webhook: { verifiedCount: hooks.length, lastType: hooks[hooks.length - 1]?.webhookType ?? null, lastAt: hooks[hooks.length - 1]?.at ?? null },
     events,

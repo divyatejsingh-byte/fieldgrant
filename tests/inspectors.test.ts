@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildConsensus } from "../src/lib/consensus";
-import { paypalRequestId } from "../src/lib/idempotency";
+import { payoutEpoch, paypalRequestId } from "../src/lib/idempotency";
 import { payoutInspector, receiptSeen, submissionDetail } from "../src/lib/queries";
 import { processSubmission } from "../src/lib/pipeline";
 import { cleanRawExtraction } from "../src/lib/rules/fixtures";
@@ -42,8 +42,8 @@ describe("payout inspector and duplicate lookup", () => {
     const r = await processSubmission({ db, llm: mockLlm(cleanRawExtraction()), release: (sid) => releaseTranche(db, pp, sid) }, { ...NGO1_T2, receipt: fakeFile(), roster: fakeFile(), memoText: "ok" });
     const d = submissionDetail(db, r.submissionId)!;
     const i = payoutInspector(db, d.payout!.batchId)!;
-    expect(i.senderBatchId).toMatch(/^FG-G\d+-T\d+-A1$/);
-    expect(i.requestId).toBe(paypalRequestId(d.grant.id, d.tranche.seq, 1));
+    expect(i.senderBatchId).toMatch(/^FG-G\d+-T\d+-A1-[a-f0-9]{8}$/);
+    expect(i.requestId).toBe(paypalRequestId(d.grant.id, d.tranche.seq, 1, payoutEpoch(db)));
     expect(i.webhook.verifiedCount).toBe(0);
     expect(i.destinationEmail).toContain("@");
   });

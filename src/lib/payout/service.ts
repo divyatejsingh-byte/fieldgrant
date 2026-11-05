@@ -1,6 +1,6 @@
 // Payout service: tranche state machine + idempotent PayPal release + status application + polling + officer override.
 import type Database from "better-sqlite3";
-import { paypalRequestId, senderBatchId } from "../idempotency";
+import { payoutEpoch, paypalRequestId, senderBatchId } from "../idempotency";
 import { writeLedger } from "../ledger";
 import { formatUsd } from "../money";
 import {
@@ -78,11 +78,12 @@ export async function releaseTranche(db: Database.Database, pp: PayPalApi, submi
   })();
   if (capError) return fail(capError, "SPEND_CAP", false);
 
-  const batchId = senderBatchId(grant.id, tranche.seq, attempt);
+  const epoch = payoutEpoch(db);
+  const batchId = senderBatchId(grant.id, tranche.seq, attempt, epoch);
   try {
     const res = await pp.createPayout({
       senderBatchId: batchId,
-      requestId: paypalRequestId(grant.id, tranche.seq, attempt),
+      requestId: paypalRequestId(grant.id, tranche.seq, attempt, epoch),
       receiverEmail: ngo.paypal_email,
       amountCents: tranche.amount_cents,
       senderItemId: `${batchId}-I1`,

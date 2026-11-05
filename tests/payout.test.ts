@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { paypalRequestId, senderBatchId } from "../src/lib/idempotency";
+import { payoutEpoch, paypalRequestId, senderBatchId } from "../src/lib/idempotency";
 import { applyBatchDetails, overrideDecision, PayoutError, releaseTranche } from "../src/lib/payout/service";
 import { handlePayPalWebhook } from "../src/lib/payout/webhook-handler";
 import { PayPalError } from "../src/lib/paypal/client";
@@ -26,7 +26,7 @@ describe("idempotent release", () => {
     expect(res.payoutBatchId).toBe("BATCH-TEST-1");
     expect(status(db)).toBe("RELEASING");
     expect(pp.calls).toHaveLength(1);
-    expect(pp.calls[0]).toMatchObject({ senderBatchId: senderBatchId(1, 2, 1), requestId: paypalRequestId(1, 2, 1), amountCents: 500_000 });
+    expect(pp.calls[0]).toMatchObject({ senderBatchId: senderBatchId(1, 2, 1, payoutEpoch(db)), requestId: paypalRequestId(1, 2, 1, payoutEpoch(db)), amountCents: 500_000 });
     expect(ledger(db, "PAYOUT_CREATED")[0].payout_batch_id).toBe("BATCH-TEST-1");
   });
 
@@ -75,7 +75,7 @@ describe("failure handling", () => {
     expect(ledger(db, "PAYOUT_FAILED")).toHaveLength(1);
     pp.setFail(null);
     await releaseTranche(db, pp, sid);
-    expect(pp.calls[1].senderBatchId).toBe(senderBatchId(1, 2, 2));
+    expect(pp.calls[1].senderBatchId).toBe(senderBatchId(1, 2, 2, payoutEpoch(db)));
     expect(pp.calls[1].requestId).not.toBe(pp.calls[0].requestId);
   });
 
@@ -206,5 +206,19 @@ describe("webhooks", () => {
       const h = new Headers({ "paypal-transmission-id": "1", "paypal-transmission-time": "t", "paypal-transmission-sig": "s", "paypal-auth-algo": "SHA256withRSA", "paypal-cert-url": "https://evil.example.com/cert.pem" });
       expect(await verifyPayPalWebhook(h, "{}")).toBe(false);
     });
+  });
+});
+
+describe("PayPal remembers sender_batch_id for 30 days", () => {
+  it("a reseeded demo gets a new epoch, so the same grant, tranche and attempt never reuses an id", async () => {
+    const { freshDb } = await import("./helpers");
+    const { seedDatabase } = await import("../src/lib/seed");
+    const db = freshDb();
+    const first = payoutEpoch(db);
+    seedDatabase(db, ["a@example.test", "b@example.test", "c@example.test"]);
+    const second = payoutEpoch(db);
+    expect(first).toMatch(/^[a-f0-9]{8}$/);
+    expect(second).not.toBe(first);
+    expect(senderBatchId(1, 2, 1, first)).not.toBe(senderBatchId(1, 2, 1, second));
   });
 });

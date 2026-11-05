@@ -17,3 +17,14 @@ describe("idempotency keys", () => {
     expect(senderBatchId(99999, 3, 99)).toMatch(/^[A-Za-z0-9-]{1,100}$/);
   });
 });
+
+describe("epoch keeps batch ids unique across demo resets", () => {
+  it("adds the epoch to both keys, and different epochs never collide", () => {
+    expect(senderBatchId(1, 2, 1, "ab12cd34")).toBe("FG-G1-T2-A1-ab12cd34");
+    expect(senderBatchId(1, 2, 1, "ab12cd34")).not.toBe(senderBatchId(1, 2, 1, "ff00ee11"));
+    expect(paypalRequestId(1, 2, 1, "ab12cd34")).not.toBe(paypalRequestId(1, 2, 1, "ff00ee11"));
+  });
+  it("without an epoch the id keeps the original format", () => {
+    expect(senderBatchId(1, 2, 1)).toBe("FG-G1-T2-A1");
+  });
+});
