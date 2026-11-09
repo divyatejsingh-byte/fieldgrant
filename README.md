@@ -8,6 +8,15 @@ Built for the "Build What's Next with PayPal and AI" hackathon.
 > review (for example FCRA in India). It makes **no claim of legal compliance or production readiness**.
 > PayPal is used in the **sandbox only**; the code refuses any non-sandbox PayPal host.
 
+## Live demo
+
+**https://fieldgrant.onrender.com** (PayPal sandbox only, mock documents, no login).
+
+- Open the **Grantee** view, go to *Send documents*, and click one of the five one-click scenarios. Scenario 1 runs the full path: AI reads the documents twice, ten plain-code checks decide RELEASE, and a real PayPal **sandbox** payout is dispatched and settled.
+- Open the payout ID (decision screen or ledger) to see the **PayPal Rail Inspector**: recipient, `sender_batch_id`, `PayPal-Request-Id`, status, and whether a **signature-verified webhook** arrived.
+- The deployment is verified end to end: a live sandbox payout settled to `PAID`, and PayPal's `PAYMENT.PAYOUTS-ITEM.SUCCEEDED` webhook was received and passed signature verification.
+- It runs on Render's **free** instance, so the first request after 15 idle minutes takes about a minute, and the demo database resets on restart (it reseeds itself). `render.paid.yaml` is the variant with a persistent disk.
+
 ## The problem
 
 A foundation awards a grant (e.g. $10,000) split into tranches (25% / 50% / 25%). Tranches 2 and 3 sit blocked for
