@@ -12,6 +12,8 @@ Built for the "Build What's Next with PayPal and AI" hackathon.
 
 **https://fieldgrant.onrender.com** (PayPal sandbox only, mock documents, no login).
 
+**Demo video (3:30):** https://youtu.be/IIK0vaQksng — a fresh live sandbox payment, the signature-verified webhook, the PayPal rail inspector, the AG Grid audit ledger, the review queue, compliance covenants, reports and the safety scenarios.
+
 - Open the **Grantee** view, go to *Send documents*, and click one of the five one-click scenarios. Scenario 1 runs the full path: AI reads the documents twice, ten plain-code checks decide RELEASE, and a real PayPal **sandbox** payout is dispatched and settled.
 - Open the payout ID (decision screen or ledger) to see the **PayPal Rail Inspector**: recipient, `sender_batch_id`, `PayPal-Request-Id`, status, and whether a **signature-verified webhook** arrived.
 - The deployment is verified end to end: a live sandbox payout settled to `PAID`, and PayPal's `PAYMENT.PAYOUTS-ITEM.SUCCEEDED` webhook was received and passed signature verification.
